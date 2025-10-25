@@ -23,6 +23,7 @@ app.use(cookieParser());
 // 라우트
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/articles', require('./routes/articles'));
+app.use('/api/authors', require('./routes/authors'));
 
 // 기본 라우트
 app.get('/', (req, res) => {

@@ -32,6 +32,39 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  // 작가 관련 필드
+  isAuthor: {
+    type: Boolean,
+    default: false,
+  },
+  authorStatus: {
+    type: String,
+    enum: ['none', 'pending', 'approved', 'rejected'],
+    default: 'none',
+  },
+  authorBio: {
+    type: String,
+    default: '',
+  },
+  authorCategory: {
+    type: String,
+    default: '',
+  },
+  socialLinks: {
+    twitter: { type: String, default: '' },
+    github: { type: String, default: '' },
+    linkedin: { type: String, default: '' },
+    website: { type: String, default: '' },
+  },
+  // 팔로우 기능
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+  following: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
   bookmarks: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Article',

@@ -31,3 +31,11 @@ exports.isAdmin = async (req, res, next) => {
   }
   next();
 };
+
+// 작가 또는 관리자 권한 확인
+exports.isAuthorOrAdmin = async (req, res, next) => {
+  if (req.user.role !== 'admin' && !req.user.isAuthor) {
+    return res.status(403).json({ message: '작가 권한이 필요합니다. 작가 신청을 해주세요.' });
+  }
+  next();
+};
