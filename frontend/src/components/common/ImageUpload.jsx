@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, X } from 'lucide-react';
 import api from '../../utils/api';
 
 const ImageUpload = ({ value, onChange, label = '이미지 업로드' }) => {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(value || '');
+
+  // value prop이 변경되면 preview 업데이트
+  useEffect(() => {
+    setPreview(value || '');
+  }, [value]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
