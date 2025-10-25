@@ -9,6 +9,7 @@ import WriteArticle from './pages/WriteArticle';
 import ApplyAuthor from './pages/ApplyAuthor';
 import AuthorList from './pages/AuthorList';
 import AuthorDetail from './pages/AuthorDetail';
+import CreateAd from './pages/CreateAd';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/authors" element={<AuthorList />} />
           <Route path="/author/:id" element={<AuthorDetail />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/ad/create" element={<CreateAd />} />
         </Routes>
       </div>
     </Router>

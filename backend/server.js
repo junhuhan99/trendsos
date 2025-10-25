@@ -20,10 +20,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// 정적 파일 제공 (업로드된 이미지)
+app.use('/uploads', express.static('uploads'));
+
 // 라우트
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/articles', require('./routes/articles'));
 app.use('/api/authors', require('./routes/authors'));
+app.use('/api/ads', require('./routes/ads'));
+app.use('/api/upload', require('./routes/upload'));
 
 // 기본 라우트
 app.get('/', (req, res) => {

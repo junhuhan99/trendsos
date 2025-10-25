@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X } from 'lucide-react';
+import RichTextEditor from '../components/common/RichTextEditor';
+import ImageUpload from '../components/common/ImageUpload';
 import api from '../utils/api';
 
 const WriteArticle = () => {
@@ -14,6 +15,9 @@ const WriteArticle = () => {
     category: '개발',
     thumbnail: '',
     featured: false,
+    metaTitle: '',
+    metaDescription: '',
+    metaKeywords: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -58,7 +62,17 @@ const WriteArticle = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/articles', formData);
+      // metaKeywords를 배열로 변환
+      const keywords = formData.metaKeywords
+        .split(',')
+        .map(k => k.trim())
+        .filter(k => k);
+
+      const response = await api.post('/articles', {
+        ...formData,
+        metaKeywords: keywords,
+      });
+
       alert('게시글이 작성되었습니다!');
       navigate(`/article/${response.data.article._id}`);
     } catch (err) {
@@ -70,7 +84,7 @@ const WriteArticle = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-4">
         <div className="bg-white rounded-2xl shadow-sm p-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">새 글 작성</h1>
@@ -110,18 +124,28 @@ const WriteArticle = () => {
                 required
                 value={formData.summary}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                 rows="3"
-                placeholder="글의 핵심 내용을 간단히 요약해주세요 (최대 200자)"
-                maxLength="200"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="글의 핵심 내용을 2-3줄로 요약해주세요"
               />
-              <p className="text-sm text-gray-500 mt-1">{formData.summary.length}/200</p>
+            </div>
+
+            {/* 본문 (Rich Text Editor) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                본문 <span className="text-red-500">*</span>
+              </label>
+              <RichTextEditor
+                value={formData.content}
+                onChange={(value) => setFormData({ ...formData, content: value })}
+                placeholder="본문 내용을 작성하세요..."
+              />
             </div>
 
             {/* 카테고리 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                카테고리 <span className="text-red-500">*</span>
+                카테고리
               </label>
               <select
                 name="category"
@@ -135,56 +159,63 @@ const WriteArticle = () => {
               </select>
             </div>
 
-            {/* 썸네일 URL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                썸네일 이미지 URL
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  name="thumbnail"
-                  value={formData.thumbnail}
-                  onChange={handleChange}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-              {formData.thumbnail && (
-                <div className="mt-3 relative">
-                  <img
-                    src={formData.thumbnail}
-                    alt="썸네일 미리보기"
-                    className="w-full h-48 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, thumbnail: '' })}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* 썸네일 이미지 */}
+            <ImageUpload
+              label="썸네일 이미지"
+              value={formData.thumbnail}
+              onChange={(url) => setFormData({ ...formData, thumbnail: url })}
+            />
 
-            {/* 본문 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                본문 <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="content"
-                required
-                value={formData.content}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none font-mono"
-                rows="20"
-                placeholder="본문 내용을 입력하세요. 마크다운을 지원합니다."
-              />
+            {/* SEO 설정 */}
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">SEO 최적화 (선택사항)</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    메타 제목
+                  </label>
+                  <input
+                    type="text"
+                    name="metaTitle"
+                    value={formData.metaTitle}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="비워두면 제목이 자동으로 사용됩니다"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">검색 결과에 표시될 제목 (권장: 50-60자)</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    메타 설명
+                  </label>
+                  <textarea
+                    name="metaDescription"
+                    value={formData.metaDescription}
+                    onChange={handleChange}
+                    rows="2"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="비워두면 요약이 자동으로 사용됩니다"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">검색 결과에 표시될 설명 (권장: 120-160자)</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    키워드
+                  </label>
+                  <input
+                    type="text"
+                    name="metaKeywords"
+                    value={formData.metaKeywords}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="예: React, JavaScript, 프론트엔드 (쉼표로 구분)"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">쉼표(,)로 구분하여 입력하세요</p>
+                </div>
+              </div>
             </div>
 
             {/* 오늘의 토픽 (관리자만) */}
@@ -205,18 +236,18 @@ const WriteArticle = () => {
             )}
 
             {/* 버튼 */}
-            <div className="flex gap-3 pt-6">
+            <div className="flex gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="flex-1 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="flex-1 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 취소
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors disabled:opacity-50"
               >
                 {loading ? '작성 중...' : '게시하기'}
               </button>
