@@ -16,14 +16,27 @@ const HeroSlider = () => {
 
   const fetchFeaturedArticles = async () => {
     try {
-      const response = await api.get('/articles?featured=true&limit=5');
-      setArticles(response.data.articles || []);
+      // featured 게시글 먼저 시도
+      let response = await api.get('/articles?featured=true&limit=5');
+      let fetchedArticles = response.data.articles || [];
+
+      // featured가 없으면 최신 게시글 사용
+      if (fetchedArticles.length === 0) {
+        response = await api.get('/articles?sort=recent&limit=5');
+        fetchedArticles = response.data.articles || [];
+      }
+
+      setArticles(fetchedArticles);
     } catch (error) {
       console.error('Failed to fetch featured articles:', error);
     }
   };
 
-  if (articles.length === 0) return null;
+  if (articles.length === 0) return (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm h-96 flex items-center justify-center">
+      <p className="text-gray-500">게시글이 없습니다.</p>
+    </div>
+  );
 
   return (
     <div className="relative bg-white rounded-2xl overflow-hidden shadow-sm">

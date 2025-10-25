@@ -6,7 +6,8 @@ import api from '../utils/api';
 
 const WriteArticle = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
+  const [user, setUser] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -23,12 +24,58 @@ const WriteArticle = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // 페이지 로드 시 최신 사용자 정보 가져오기
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    setUser(currentUser);
+    // 서버에서 최신 사용자 정보 가져오기
+    const fetchUserInfo = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setCheckingAuth(false);
+        return;
+      }
+
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
+      } catch (error) {
+        console.error('Failed to fetch user info:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+
+    fetchUserInfo();
   }, []);
 
   const categories = ['개발', 'AI', 'IT서비스', '기획', '디자인', '비즈니스', '프로덕트', '커리어', '트렌드', '스타트업'];
+
+  // 로딩 중
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  // 로그인 안 됨
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">로그인이 필요합니다</h2>
+          <p className="text-gray-600 mb-6">글을 작성하려면 로그인해주세요.</p>
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors"
+          >
+            로그인하기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // 작가 또는 관리자가 아니면 접근 불가
   if (!user.isAuthor && user.role !== 'admin') {
@@ -37,6 +84,7 @@ const WriteArticle = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">작가 권한이 필요합니다</h2>
           <p className="text-gray-600 mb-6">글을 작성하려면 작가 신청을 해주세요.</p>
+          <p className="text-sm text-gray-500 mb-6">현재 상태: {user.isAuthor ? '작가 승인됨' : '일반 회원'}</p>
           <button
             onClick={() => navigate('/author/apply')}
             className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors"
