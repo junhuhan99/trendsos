@@ -15,7 +15,9 @@
       "Bash(git pull:*)",
       "Bash(icacls:*)",
       "Bash(ssh:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(curl:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

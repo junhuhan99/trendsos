@@ -6,7 +6,7 @@ import api from '../utils/api';
 
 const WriteArticle = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
 
   const [formData, setFormData] = useState({
     title: '',
@@ -21,6 +21,12 @@ const WriteArticle = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // 페이지 로드 시 최신 사용자 정보 가져오기
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    setUser(currentUser);
+  }, []);
 
   const categories = ['개발', 'AI', 'IT서비스', '기획', '디자인', '비즈니스', '프로덕트', '커리어', '트렌드', '스타트업'];
 
