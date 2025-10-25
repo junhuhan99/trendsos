@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/layout/Header';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -10,13 +11,16 @@ import ApplyAuthor from './pages/ApplyAuthor';
 import AuthorList from './pages/AuthorList';
 import AuthorDetail from './pages/AuthorDetail';
 import CreateAd from './pages/CreateAd';
+import NewArticles from './pages/NewArticles';
+import PopularArticles from './pages/PopularArticles';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <Routes>
+    <HelmetProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Header />
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -27,9 +31,12 @@ function App() {
           <Route path="/author/:id" element={<AuthorDetail />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/ad/create" element={<CreateAd />} />
+          <Route path="/new" element={<NewArticles />} />
+          <Route path="/popular" element={<PopularArticles />} />
         </Routes>
       </div>
     </Router>
+    </HelmetProvider>
   );
 }
 

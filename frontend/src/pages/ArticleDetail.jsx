@@ -1,39 +1,45 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { ThumbsUp, MessageCircle, Bookmark, Share2 } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Heart, Bookmark, Share2, Eye, Clock } from 'lucide-react';
 import api from '../utils/api';
+import SEO from '../components/common/SEO';
 
 const ArticleDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [article, setArticle] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [author, setAuthor] = useState(null);
+  const [relatedArticles, setRelatedArticles] = useState([]);
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchArticle();
-    fetchComments();
   }, [id]);
 
   const fetchArticle = async () => {
     try {
       const response = await api.get(`/articles/${id}`);
       setArticle(response.data);
-      setLoading(false);
+
+      if (response.data.author) {
+        try {
+          const authorRes = await api.get(`/authors/${response.data.author._id || response.data.author}`);
+          setAuthor(authorRes.data.author);
+        } catch (err) {
+          console.log('Author not found');
+        }
+      }
+
+      const relatedRes = await api.get(`/articles?category=${response.data.category}&limit=5`);
+      setRelatedArticles(relatedRes.data.articles.filter(a => a._id !== id));
     } catch (error) {
       console.error('Failed to fetch article:', error);
+      alert('게시글을 불러올 수 없습니다.');
+      navigate('/');
+    } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchComments = async () => {
-    try {
-      const response = await api.get(`/articles/${id}/comments`);
-      setComments(response.data.comments || []);
-    } catch (error) {
-      console.error('Failed to fetch comments:', error);
     }
   };
 
@@ -42,13 +48,12 @@ const ArticleDetail = () => {
       alert('로그인이 필요합니다.');
       return;
     }
-
     try {
-      await api.post(`/articles/${id}/like`);
-      setLiked(!liked);
-      setArticle({ ...article, likes: liked ? article.likes - 1 : article.likes + 1 });
+      const response = await api.post(`/articles/${id}/like`);
+      setLiked(response.data.hasLiked);
+      setArticle({ ...article, likes: response.data.likes });
     } catch (error) {
-      console.error('Failed to like article:', error);
+      console.error('Like error:', error);
     }
   };
 
@@ -57,33 +62,11 @@ const ArticleDetail = () => {
       alert('로그인이 필요합니다.');
       return;
     }
-
     try {
-      await api.post(`/articles/${id}/bookmark`);
-      setBookmarked(!bookmarked);
+      const response = await api.post(`/articles/${id}/bookmark`);
+      setBookmarked(response.data.hasBookmarked);
     } catch (error) {
-      console.error('Failed to bookmark article:', error);
-    }
-  };
-
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!localStorage.getItem('token')) {
-      alert('로그인이 필요합니다.');
-      return;
-    }
-
-    if (!newComment.trim()) {
-      return;
-    }
-
-    try {
-      await api.post(`/articles/${id}/comments`, { content: newComment });
-      setNewComment('');
-      fetchComments();
-    } catch (error) {
-      console.error('Failed to post comment:', error);
+      console.error('Bookmark error:', error);
     }
   };
 
@@ -95,151 +78,106 @@ const ArticleDetail = () => {
     );
   }
 
-  if (!article) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">게시글을 찾을 수 없습니다.</p>
-      </div>
-    );
-  }
+  if (!article) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* 좌측 사이드바 (고정) */}
-        <div className="hidden lg:block fixed left-8 top-1/2 -translate-y-1/2">
-          <div className="flex flex-col gap-4">
-            <button
-              onClick={handleLike}
-              className={`p-3 rounded-lg ${liked ? 'bg-primary-100 text-primary-600' : 'bg-white hover:bg-gray-100'} transition-colors`}
-            >
-              <ThumbsUp className="w-5 h-5" />
-              <span className="block text-xs mt-1">{article.likes || 0}</span>
-            </button>
-            <button className="p-3 bg-white hover:bg-gray-100 rounded-lg transition-colors">
-              <MessageCircle className="w-5 h-5" />
-              <span className="block text-xs mt-1">{comments.length}</span>
-            </button>
-            <button
-              onClick={handleBookmark}
-              className={`p-3 rounded-lg ${bookmarked ? 'bg-primary-100 text-primary-600' : 'bg-white hover:bg-gray-100'} transition-colors`}
-            >
-              <Bookmark className="w-5 h-5" />
-            </button>
-            <button className="p-3 bg-white hover:bg-gray-100 rounded-lg transition-colors">
-              <Share2 className="w-5 h-5" />
-            </button>
+    <>
+      <SEO
+        title={article.metaTitle || article.title}
+        description={article.metaDescription || article.summary}
+        keywords={article.metaKeywords || [article.category]}
+        ogImage={article.ogImage || article.thumbnail}
+        article={true}
+        publishedTime={article.createdAt}
+        modifiedTime={article.updatedAt}
+        author={author?.name}
+        canonical={`/article/${article._id}`}
+      />
+
+      <div className="bg-white">
+        <div className="border-b">
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Link to="/" className="text-sm text-primary-600 hover:underline">{article.category}</Link>
+              <span className="text-gray-300">|</span>
+              <span className="text-sm text-gray-500">{new Date(article.createdAt).toLocaleDateString('ko-KR')}</span>
+            </div>
+            <h1 className="text-4xl font-bold mb-4 leading-tight">{article.title}</h1>
+            <p className="text-xl text-gray-600 mb-6">{article.summary}</p>
+            <div className="flex items-center gap-6 text-sm text-gray-500">
+              <div className="flex items-center gap-1"><Eye className="w-4 h-4" /><span>{article.views || 0}</span></div>
+              <div className="flex items-center gap-1"><Clock className="w-4 h-4" /><span>{article.readTime || 5}분</span></div>
+            </div>
           </div>
         </div>
 
-        {/* 메인 콘텐츠 */}
-        <article className="bg-white rounded-2xl shadow-sm p-8 mb-8">
-          {/* 헤더 */}
-          <div className="mb-6">
-            <span className="inline-block px-3 py-1 bg-primary-100 text-primary-600 rounded-full text-sm font-medium mb-4">
-              {article.category}
-            </span>
-            <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white">
-                  {article.author?.name?.[0] || 'U'}
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-12 gap-8">
+            <aside className="col-span-2 hidden lg:block">
+              <div className="sticky top-24">
+                {author && (
+                  <Link to={`/author/${author._id}`} className="block">
+                    <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center text-white text-2xl mb-3 mx-auto">{author.name[0]}</div>
+                    <p className="text-center font-medium text-sm">{author.name}</p>
+                    <p className="text-center text-xs text-gray-500 mt-1">{author.authorCategory}</p>
+                  </Link>
+                )}
+                <div className="mt-6 space-y-3">
+                  <button onClick={handleLike} className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg border ${liked ? 'bg-red-50 border-red-500 text-red-500' : 'border-gray-300 hover:bg-gray-50'}`}>
+                    <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} /><span className="text-sm">{article.likes || 0}</span>
+                  </button>
+                  <button onClick={handleBookmark} className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg border ${bookmarked ? 'bg-primary-50 border-primary-500 text-primary-500' : 'border-gray-300 hover:bg-gray-50'}`}>
+                    <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
+                  </button>
+                  <button className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"><Share2 className="w-4 h-4" /></button>
                 </div>
-                {article.author?.name || '익명'}
-              </span>
-              <span>·</span>
-              <span>{new Date(article.createdAt).toLocaleDateString('ko-KR')}</span>
-              <span>·</span>
-              <span>조회 {article.views || 0}</span>
-            </div>
-          </div>
-
-          {/* 본문 */}
-          <div className="prose max-w-none mb-8">
-            {article.content?.split('\n').map((paragraph, index) => (
-              <p key={index} className="mb-4 text-gray-800 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-
-          {/* 작가 프로필 */}
-          <div className="border-t border-gray-200 pt-6 mt-8">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center text-white text-2xl">
-                {article.author?.name?.[0] || 'U'}
               </div>
-              <div>
-                <h3 className="font-semibold text-lg">{article.author?.name || '익명'}</h3>
-                <p className="text-sm text-gray-600">{article.author?.bio || ''}</p>
-              </div>
-            </div>
-          </div>
-        </article>
+            </aside>
 
-        {/* 댓글 섹션 */}
-        <div className="bg-white rounded-2xl shadow-sm p-8">
-          <h2 className="text-2xl font-bold mb-6">댓글 {comments.length}</h2>
-
-          {/* 댓글 작성 */}
-          {localStorage.getItem('token') ? (
-            <form onSubmit={handleCommentSubmit} className="mb-8">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="로그인하고 자유롭게 의견을 남겨주세요."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-                rows="4"
-              />
-              <div className="mt-2 flex justify-end">
-                <button
-                  type="submit"
-                  className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition-colors"
-                >
-                  작성하기
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="mb-8 p-6 bg-gray-50 rounded-lg text-center">
-              <p className="text-gray-600 mb-4">로그인하고 자유롭게 의견을 남겨주세요</p>
-              <a
-                href="/login"
-                className="inline-block bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition-colors"
-              >
-                로그인
-              </a>
-            </div>
-          )}
-
-          {/* 댓글 리스트 */}
-          <div className="space-y-6">
-            {comments.map((comment) => (
-              <div key={comment._id} className="border-b border-gray-200 pb-6 last:border-0">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-white">
-                    {comment.author?.name?.[0] || 'U'}
+            <main className="col-span-12 lg:col-span-7">
+              {article.thumbnail && <img src={article.thumbnail} alt={article.title} className="w-full rounded-lg mb-8" />}
+              <div className="prose prose-lg max-w-none article-content" dangerouslySetInnerHTML={{ __html: article.content }} />
+              {article.metaKeywords && article.metaKeywords.length > 0 && (
+                <div className="mt-12 pt-8 border-t">
+                  <div className="flex flex-wrap gap-2">
+                    {article.metaKeywords.map((keyword, idx) => (
+                      <span key={idx} className="px-3 py-1 bg-gray-100 rounded-full text-sm">#{keyword}</span>
+                    ))}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-medium">{comment.author?.name || '익명'}</span>
-                      <span className="text-sm text-gray-500">
-                        {new Date(comment.createdAt).toLocaleDateString('ko-KR')}
-                      </span>
-                    </div>
-                    <p className="text-gray-800">{comment.content}</p>
+                </div>
+              )}
+            </main>
+
+            <aside className="col-span-12 lg:col-span-3">
+              <div className="sticky top-24 space-y-6">
+                <div className="bg-gray-50 rounded-xl p-6">
+                  <h3 className="font-bold mb-4">관련 글</h3>
+                  <div className="space-y-4">
+                    {relatedArticles.slice(0, 5).map((related) => (
+                      <Link key={related._id} to={`/article/${related._id}`} className="block hover:text-primary-600">
+                        <p className="text-sm font-medium line-clamp-2">{related.title}</p>
+                        <p className="text-xs text-gray-500 mt-1">{new Date(related.createdAt).toLocaleDateString('ko-KR')}</p>
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </div>
-            ))}
-
-            {comments.length === 0 && (
-              <p className="text-center text-gray-500 py-8">첫 댓글을 작성해보세요!</p>
-            )}
+            </aside>
           </div>
         </div>
       </div>
-    </div>
+
+      <style>{`
+        .article-content img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 2rem 0; }
+        .article-content p { margin-bottom: 1.5rem; line-height: 1.8; }
+        .article-content h2 { font-size: 1.875rem; font-weight: 700; margin-top: 3rem; margin-bottom: 1rem; }
+        .article-content h3 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 0.75rem; }
+        .article-content ul, .article-content ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+        .article-content li { margin-bottom: 0.5rem; }
+        .article-content code { background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; }
+        .article-content pre { background: #1f2937; color: #f3f4f6; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 1.5rem 0; }
+      `}</style>
+    </>
   );
 };
 

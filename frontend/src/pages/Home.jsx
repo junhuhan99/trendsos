@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import SEO from '../components/common/SEO';
 import AdBanner from '../components/ads/AdBanner';
 import PopularAuthors from '../components/sidebar/PopularAuthors';
 import TrendingTags from '../components/sidebar/TrendingTags';
@@ -41,9 +42,11 @@ const Home = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 상단 배너 광고 */}
-      <div className="bg-white border-b">
+    <>
+      <SEO />
+      <div className="min-h-screen bg-gray-50">
+        {/* 상단 배너 광고 */}
+        <div className="bg-white border-b">
         <div className="container-custom py-3">
           <AdBanner position="top-banner" className="rounded-lg overflow-hidden max-h-24" />
         </div>
@@ -166,7 +169,8 @@ const Home = () => {
           </aside>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
