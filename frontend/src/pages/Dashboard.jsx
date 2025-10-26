@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { serviceAPI } from '../utils/api'
 import Layout from '../components/Layout'
-import { Server, TrendingUp, Activity, Plus } from 'lucide-react'
+import { Server, TrendingUp, Activity, Plus, Play, FileText } from 'lucide-react'
 
 export default function Dashboard() {
   const [services, setServices] = useState([])
@@ -111,6 +111,32 @@ export default function Dashboard() {
               <div>
                 <h3 className="font-medium text-gray-900">SDK 다운로드</h3>
                 <p className="text-sm text-gray-600">BlockPass SDK 설치 가이드</p>
+              </div>
+            </Link>
+
+            <Link
+              to="/demo"
+              className="flex items-center gap-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all"
+            >
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <Play className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">라이브 데모</h3>
+                <p className="text-sm text-gray-600">로그인/회원가입 테스트</p>
+              </div>
+            </Link>
+
+            <Link
+              to="/api-docs"
+              className="flex items-center gap-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+            >
+              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">API 문서</h3>
+                <p className="text-sm text-gray-600">REST API 레퍼런스</p>
               </div>
             </Link>
           </div>

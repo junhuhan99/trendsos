@@ -9,6 +9,8 @@ import Services from './pages/Services'
 import ServiceDetail from './pages/ServiceDetail'
 import NewService from './pages/NewService'
 import SDKDownload from './pages/SDKDownload'
+import Demo from './pages/Demo'
+import APIDocumentation from './pages/APIDocumentation'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -68,6 +70,24 @@ function App() {
         element={
           <PrivateRoute>
             <SDKDownload />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/demo"
+        element={
+          <PrivateRoute>
+            <Demo />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/api-docs"
+        element={
+          <PrivateRoute>
+            <APIDocumentation />
           </PrivateRoute>
         }
       />

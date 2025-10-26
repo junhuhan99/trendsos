@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Home, Server, Download, LogOut, Menu } from 'lucide-react'
+import { Home, Server, Download, LogOut, Menu, Play, FileText } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Layout({ children }) {
@@ -72,6 +72,22 @@ export default function Layout({ children }) {
               >
                 <Download className="w-5 h-5" />
                 SDK 다운로드
+              </Link>
+
+              <Link
+                to="/demo"
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <Play className="w-5 h-5" />
+                라이브 데모
+              </Link>
+
+              <Link
+                to="/api-docs"
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <FileText className="w-5 h-5" />
+                API 문서
               </Link>
             </nav>
           </aside>

@@ -137,37 +137,38 @@ blockpass.logout(token)
 
           <div className="space-y-3">
             <a
-              href="/sdk/blockpass-sdk.js"
-              download
-              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-all"
+              href="/blockpass-sdk.js"
+              download="blockpass-sdk.js"
+              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-all cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <Download className="w-5 h-5 text-primary-600" />
                 <div>
                   <p className="font-medium text-gray-900">blockpass-sdk.js</p>
-                  <p className="text-sm text-gray-600">JavaScript SDK (Minified)</p>
+                  <p className="text-sm text-gray-600">JavaScript SDK (Ready to use)</p>
                 </div>
               </div>
               <span className="text-sm text-gray-500">v1.0.0</span>
             </a>
 
             <a
-              href="/sdk/blockpass-sdk.d.ts"
-              download
+              href="https://github.com/junhuhan99/tendsos/blob/main/sdk/src/blockpass.js"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-all"
             >
               <div className="flex items-center gap-3">
                 <FileCode className="w-5 h-5 text-primary-600" />
                 <div>
-                  <p className="font-medium text-gray-900">blockpass-sdk.d.ts</p>
-                  <p className="text-sm text-gray-600">TypeScript 타입 정의</p>
+                  <p className="font-medium text-gray-900">소스 코드 보기</p>
+                  <p className="text-sm text-gray-600">GitHub에서 소스 코드 확인</p>
                 </div>
               </div>
-              <span className="text-sm text-gray-500">v1.0.0</span>
+              <span className="text-sm text-gray-500">→</span>
             </a>
 
             <a
-              href="https://github.com/junhuhan99/tendsos"
+              href="https://github.com/junhuhan99/tendsos/blob/main/sdk/README.md"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-all"
@@ -175,8 +176,8 @@ blockpass.logout(token)
               <div className="flex items-center gap-3">
                 <Book className="w-5 h-5 text-primary-600" />
                 <div>
-                  <p className="font-medium text-gray-900">전체 문서</p>
-                  <p className="text-sm text-gray-600">GitHub에서 상세 문서 확인</p>
+                  <p className="font-medium text-gray-900">SDK 문서</p>
+                  <p className="text-sm text-gray-600">전체 사용 가이드 및 예제</p>
                 </div>
               </div>
               <span className="text-sm text-gray-500">→</span>
