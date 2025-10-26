@@ -1,198 +1,99 @@
-# 트렌드OS
+# BlockPass Ω (Omega)
 
-IT 트렌드와 개발 지식을 공유하는 콘텐츠 플랫폼
+**차세대 블록체인 기반 로그인 인프라**
+
+> "보이지 않는 블록체인이 당신의 로그인 뒤에서 작동한다."
+
+## 개요
+
+BlockPass Ω는 기존의 ID + Password 로그인 방식을 유지하면서, 그 내부 인증 구조 전체를 블록체인 네트워크 기반으로 재설계한 차세대 하이브리드 인증 인프라입니다.
+
+사용자는 평범하게 로그인하지만, 실제로는 다중 블록체인 합의와 스마트컨트랙트 검증이 그 뒤에서 동시에 작동합니다.
+
+## 주요 특징
+
+- ✅ **블록체인 해시체인**: 비밀번호를 블록체인에서 검증
+- ✅ **스마트컨트랙트 세션**: 세션 자체를 블록체인 자산으로 관리
+- ✅ **분산 로그 저장**: IPFS + Arweave 영구 기록
+- ✅ **DID 자동 생성**: 사용자별 고유 분산 ID
+- ✅ **이중 합의 검증**: Private + Public Chain 병행
+- ✅ **간편한 통합**: SDK만 추가하면 블록체인 로그인 완성
+
+## 아키텍처
+
+```
+사용자 → SDK → API Gateway → Blockchain Network
+                    ↓
+           [BDID Chain]
+           [Fabric Private Chain]
+           [Ethereum/Polygon]
+           [IPFS/Arweave]
+```
+
+## 시작하기
+
+### 웹사이트 운영자
+
+1. **계정 생성**: BlockPass Ω 플랫폼에서 계정 생성
+2. **서비스 등록**: 웹사이트 URL 등록
+3. **API 키 발급**: 고유 API 키 및 SDK 다운로드
+4. **SDK 통합**: 웹사이트에 SDK 추가
+
+```html
+<script src="blockpass-sdk.js"></script>
+<script>
+  const blockpass = new BlockPass({
+    apiKey: 'your-api-key',
+    domain: 'https://your-website.com'
+  });
+
+  blockpass.login('userId', 'password')
+    .then(result => console.log('Logged in!', result));
+</script>
+```
+
+## 프로젝트 구조
+
+```
+blockpass-omega/
+├── backend/          # API 서버
+├── frontend/         # 관리자 대시보드
+├── sdk/             # BlockPass SDK
+├── contracts/       # Smart Contracts
+└── docs/            # 문서
+```
 
 ## 기술 스택
 
-### Frontend
-- React 18
-- Vite
-- Tailwind CSS
-- React Router
-- Axios
-- Lucide React (아이콘)
-
-### Backend
-- Node.js
-- Express
-- MongoDB (Mongoose)
-- JWT 인증
-- bcryptjs
-
-## 주요 기능
-
-- 게시글 작성/조회/수정/삭제 (CRUD)
-- 사용자 인증 (회원가입, 로그인)
-- 관리자 대시보드
-- 게시글 좋아요/북마크
-- 댓글 기능
-- 카테고리별 필터링
-- 인기 콘텐츠 정렬
-- 반응형 디자인
-
-## 로컬 개발 환경 설정
-
-### 1. 저장소 클론
-```bash
-git clone https://github.com/junhuhan99/trendsos.git
-cd trendsos
-```
-
-### 2. Backend 설정
-```bash
-cd backend
-npm install
-cp .env.example .env
-# .env 파일 수정 (MongoDB URI, JWT_SECRET 등)
-npm run dev
-```
-
-### 3. Frontend 설정
-```bash
-cd frontend
-npm install
-cp .env.example .env
-# .env 파일 수정
-npm run dev
-```
-
-### 4. MongoDB 설치 및 실행
-```bash
-# Ubuntu
-sudo apt-get install -y mongodb
-sudo systemctl start mongodb
-sudo systemctl enable mongodb
-```
-
-## 배포
-
-### EC2 배포 (Ubuntu)
-
-1. **서버 접속**
-```bash
-ssh -i trendsos.pem ubuntu@15.165.30.90
-```
-
-2. **Node.js 설치**
-```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
-```
-
-3. **MongoDB 설치**
-```bash
-wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | sudo apt-key add -
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-sudo apt-get update
-sudo apt-get install -y mongodb-org
-sudo systemctl start mongod
-sudo systemctl enable mongod
-```
-
-4. **프로젝트 클론 및 설정**
-```bash
-git clone https://github.com/junhuhan99/trendsos.git
-cd trendsos
-
-# Backend
-cd backend
-npm install
-# .env 파일 설정
-npm start
-
-# Frontend (새 터미널)
-cd frontend
-npm install
-npm run build
-```
-
-5. **Nginx 설정**
-```bash
-sudo apt-get install -y nginx
-
-# Nginx 설정 파일 생성
-sudo nano /etc/nginx/sites-available/trendsos
-```
-
-Nginx 설정 내용:
-```nginx
-server {
-    listen 80;
-    server_name 15.165.30.90;
-
-    location / {
-        root /home/ubuntu/trendsos/frontend/dist;
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /api {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-```bash
-sudo ln -s /etc/nginx/sites-available/trendsos /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-```
-
-6. **PM2로 백엔드 실행**
-```bash
-sudo npm install -g pm2
-cd ~/trendsos/backend
-pm2 start server.js --name trendsos-backend
-pm2 startup
-pm2 save
-```
-
-## 관리자 계정 생성
-
-MongoDB에서 직접 관리자 계정 생성:
-
-```bash
-mongosh
-use trendsos
-
-db.users.insertOne({
-  name: "Admin",
-  email: "admin@trendsos.com",
-  password: "$2a$10$...", // bcrypt로 해시된 비밀번호
-  role: "admin",
-  bio: "트렌드OS 관리자",
-  avatar: "",
-  bookmarks: [],
-  createdAt: new Date(),
-  updatedAt: new Date()
-})
-```
+- **Backend**: Node.js + Express + GraphQL
+- **Frontend**: React + Tailwind CSS
+- **Blockchain**: Ethereum (Sepolia), IPFS, Custom BDID Chain
+- **Database**: PostgreSQL + MongoDB
+- **SDK**: JavaScript/TypeScript
 
 ## API 엔드포인트
 
-### 인증
-- POST `/api/auth/register` - 회원가입
-- POST `/api/auth/login` - 로그인
-- GET `/api/auth/me` - 현재 사용자 정보
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/auth/login | 로그인 요청 |
+| POST | /api/auth/register | 계정 등록 + DID 생성 |
+| GET | /api/auth/verify | 세션 유효성 검증 |
+| GET | /api/auth/logs | 블록체인 로그 조회 |
 
-### 게시글
-- GET `/api/articles` - 게시글 목록
-- GET `/api/articles/:id` - 게시글 상세
-- POST `/api/articles` - 게시글 작성 (관리자)
-- PUT `/api/articles/:id` - 게시글 수정
-- DELETE `/api/articles/:id` - 게시글 삭제
-- POST `/api/articles/:id/like` - 좋아요
-- POST `/api/articles/:id/bookmark` - 북마크
+## 보안 구조
 
-### 댓글
-- GET `/api/articles/:articleId/comments` - 댓글 목록
-- POST `/api/articles/:articleId/comments` - 댓글 작성
-- DELETE `/api/articles/:articleId/comments/:commentId` - 댓글 삭제
+| 항목 | BlockPass Ω 처리 방식 | 효과 |
+|------|----------------------|------|
+| 비밀번호 | 로컬 해시 후 체인 검증 | 서버 유출 불가 |
+| 세션 | SmartContract 기반 | 탈중앙 만료관리 |
+| 로그 | IPFS + Arweave | 삭제·조작 불가 |
+| 인증 합의 | Private + Public Chain | 신뢰성 보장 |
 
 ## 라이선스
 
-MIT
+MIT License
+
+## 문의
+
+- Email: support@blockpass-omega.io
+- GitHub: https://github.com/junhuhan99/tendsos

@@ -1,43 +1,78 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
-import Header from './components/layout/Header';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ArticleDetail from './pages/ArticleDetail';
-import AdminDashboard from './pages/AdminDashboard';
-import WriteArticle from './pages/WriteArticle';
-import ApplyAuthor from './pages/ApplyAuthor';
-import AuthorList from './pages/AuthorList';
-import AuthorDetail from './pages/AuthorDetail';
-import CreateAd from './pages/CreateAd';
-import NewArticles from './pages/NewArticles';
-import PopularArticles from './pages/PopularArticles';
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+
+// Pages
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import Services from './pages/Services'
+import ServiceDetail from './pages/ServiceDetail'
+import NewService from './pages/NewService'
+import SDKDownload from './pages/SDKDownload'
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    setIsAuthenticated(!!token)
+  }, [])
+
+  const PrivateRoute = ({ children }) => {
+    return isAuthenticated ? children : <Navigate to="/login" />
+  }
+
   return (
-    <HelmetProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Header />
-          <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/article/:id" element={<ArticleDetail />} />
-          <Route path="/write" element={<WriteArticle />} />
-          <Route path="/author/apply" element={<ApplyAuthor />} />
-          <Route path="/authors" element={<AuthorList />} />
-          <Route path="/author/:id" element={<AuthorDetail />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/ad/create" element={<CreateAd />} />
-          <Route path="/new" element={<NewArticles />} />
-          <Route path="/popular" element={<PopularArticles />} />
-        </Routes>
-      </div>
-    </Router>
-    </HelmetProvider>
-  );
+    <Routes>
+      <Route path="/login" element={<Login setAuth={setIsAuthenticated} />} />
+      <Route path="/register" element={<Register />} />
+
+      <Route
+        path="/"
+        element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/services"
+        element={
+          <PrivateRoute>
+            <Services />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/services/new"
+        element={
+          <PrivateRoute>
+            <NewService />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/services/:id"
+        element={
+          <PrivateRoute>
+            <ServiceDetail />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/sdk"
+        element={
+          <PrivateRoute>
+            <SDKDownload />
+          </PrivateRoute>
+        }
+      />
+    </Routes>
+  )
 }
 
-export default App;
+export default App

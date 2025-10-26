@@ -1,23 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm create vite@latest frontend -- --template react)",
-      "Bash(mkdir:*)",
-      "Bash(npm init:*)",
-      "Bash(npm install:*)",
-      "Bash(npx tailwindcss init -p)",
-      "Bash(git init:*)",
-      "Bash(git remote add:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: 트렌드OS 플랫폼 구현 완료\n\n- Frontend: React + Vite + Tailwind CSS\n- Backend: Node.js + Express + MongoDB\n- 주요 기능: 게시글 CRUD, 인증, 댓글, 좋아요, 북마크\n- 관리자 대시보드 구현\n- 반응형 디자인\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git branch:*)",
-      "Bash(git push:*)",
-      "Bash(git pull:*)",
-      "Bash(icacls:*)",
-      "Bash(ssh:*)",
-      "Bash(git commit:*)",
-      "Bash(curl:*)",
-      "Bash(npm run build:*)"
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

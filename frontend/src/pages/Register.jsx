@@ -1,155 +1,184 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import api from '../utils/api';
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { operatorAPI } from '../utils/api'
+import { Lock, Mail, User, Building, AlertCircle, CheckCircle } from 'lucide-react'
 
-const Register = () => {
-  const navigate = useNavigate();
+export default function Register() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
     confirmPassword: '',
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+    name: '',
+    company: ''
+  })
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault()
+    setError('')
 
     if (formData.password !== formData.confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다.');
-      return;
+      setError('비밀번호가 일치하지 않습니다.')
+      return
     }
 
-    if (formData.password.length < 6) {
-      setError('비밀번호는 최소 6자 이상이어야 합니다.');
-      return;
+    if (formData.password.length < 8) {
+      setError('비밀번호는 최소 8자 이상이어야 합니다.')
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
 
     try {
-      const response = await api.post('/auth/register', {
-        name: formData.name,
+      const response = await operatorAPI.register({
         email: formData.email,
         password: formData.password,
-      });
+        name: formData.name,
+        company: formData.company
+      })
 
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-
-      navigate('/');
-      window.location.reload();
+      if (response.data.success) {
+        setSuccess(true)
+        setTimeout(() => {
+          navigate('/login')
+        }, 2000)
+      }
     } catch (err) {
-      setError(err.response?.data?.message || '회원가입에 실패했습니다.');
+      setError(err.response?.data?.error || '회원가입에 실패했습니다.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          {/* 로고 */}
-          <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center space-x-2">
-              <span className="text-primary-600 font-bold text-3xl">⚡</span>
-              <span className="font-bold text-2xl">트렌드OS</span>
-            </Link>
-            <p className="mt-2 text-gray-600">지금 회원가입하고 실무 꿀팁을 스크랩해 보세요</p>
-          </div>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-primary-600 mb-2">
+            BlockPass Ω
+          </h1>
+          <p className="text-gray-600">블록체인 기반 로그인 인프라</p>
+        </div>
 
-          {/* 폼 */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
+        <div className="bg-white rounded-lg shadow-xl p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            운영자 회원가입
+          </h2>
 
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                이름
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="홍길동"
-              />
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+              <p className="text-sm text-red-700">{error}</p>
             </div>
+          )}
 
+          {success && (
+            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+              <p className="text-sm text-green-700">
+                회원가입이 완료되었습니다. 로그인 페이지로 이동합니다...
+              </p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 이메일
               </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="your@email.com"
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="input pl-10"
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                이름
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="input pl-10"
+                  placeholder="홍길동"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                회사명 (선택)
+              </label>
+              <div className="relative">
+                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={formData.company}
+                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                  className="input pl-10"
+                  placeholder="회사명"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 비밀번호
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="최소 6자 이상"
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="input pl-10"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">최소 8자 이상</p>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 비밀번호 확인
               </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="비밀번호를 다시 입력하세요"
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  className="input pl-10"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
             </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || success}
+              className="w-full btn-primary py-3"
             >
-              {loading ? '가입 중...' : '회원가입'}
+              {loading ? '처리 중...' : '회원가입'}
             </button>
           </form>
 
-          {/* 로그인 링크 */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               이미 계정이 있으신가요?{' '}
@@ -161,7 +190,5 @@ const Register = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-export default Register;
+  )
+}

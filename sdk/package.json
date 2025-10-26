@@ -1,0 +1,24 @@
+{
+  "name": "@blockpass/omega-sdk",
+  "version": "1.0.0",
+  "description": "BlockPass Ω - Blockchain-based Login SDK",
+  "main": "dist/blockpass-sdk.js",
+  "types": "dist/blockpass-sdk.d.ts",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch"
+  },
+  "keywords": [
+    "blockpass",
+    "blockchain",
+    "authentication",
+    "login",
+    "DID"
+  ],
+  "author": "BlockPass Omega Team",
+  "license": "MIT",
+  "devDependencies": {
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
